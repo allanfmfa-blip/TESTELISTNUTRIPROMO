@@ -1,427 +1,492 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel de Eventos - Sinalização Digital TV</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome para Ícones -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fontes: Inter & Montserrat para legibilidade em TV -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Montserrat:wght@800;900&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agenda de Eventos & Retrofits</title>
+  <style>
+    :root {
+      --bg-dark: #0f172a;
+      --card-bg: #1e293b;
+      --card-border: #334155;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent-inauguracao: #10b981;
+      --accent-retrofit: #f59e0b;
+      --accent-outro: #3b82f6;
+      --font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    }
 
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                        display: ['Montserrat', 'sans-serif'],
-                    },
-                    colors: {
-                        darkBg: '#0b0f19',
-                        cardBg: '#161e2e',
-                        cardBorder: '#233044',
-                        inauguracao: '#10b981',
-                        retrofit: '#f59e0b',
-                    }
-                }
-            }
-        }
-    </script>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-    <style>
-        /* Ocultar barra de rolagem padrão para visual limpo em TV */
-        ::-webkit-scrollbar {
-            display: none;
-        }
-        * {
-            -ms-overflow-style: none;  /* IE and Edge */
-            scrollbar-width: none;  /* Firefox */
-        }
-        
-        body {
-            background-color: #0b0f19;
-            color: #f3f4f6;
-            overflow-x: hidden;
-            user-select: none;
-        }
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: var(--font-family);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      padding-bottom: 100px; /* Espaço para o painel de controle */
+    }
 
-        /* Animações e efeitos neon */
-        .glow-emerald {
-            box-shadow: 0 0 15px rgba(16, 185, 129, 0.25);
-        }
-        .glow-amber {
-            box-shadow: 0 0 15px rgba(245, 158, 11, 0.25);
-        }
-        .glow-blue {
-            box-shadow: 0 0 20px rgba(59, 130, 246, 0.2);
-        }
-        
-        .badge-pulse {
-            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-        }
+    /* Cabeçalho Fixo na TV */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background-color: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(8px);
+      padding: 20px 40px;
+      border-bottom: 2px solid var(--card-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    }
 
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.4; }
-        }
-    </style>
+    .header-title {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .header-title h1 {
+      font-size: 2.2rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: #ffffff;
+    }
+
+    .badge-live {
+      background-color: #ef4444;
+      color: white;
+      font-size: 0.85rem;
+      font-weight: bold;
+      padding: 4px 12px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.5; }
+      100% { opacity: 1; }
+    }
+
+    .header-clock {
+      text-align: right;
+    }
+
+    .clock-time {
+      font-size: 2rem;
+      font-weight: 700;
+      font-family: monospace;
+      color: #ffffff;
+    }
+
+    .clock-date {
+      font-size: 1rem;
+      color: var(--text-muted);
+      text-transform: capitalize;
+    }
+
+    /* Lista de Eventos */
+    .container {
+      max-width: 1200px;
+      width: 90%;
+      margin: 30px auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .event-card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 24px 32px;
+      display: grid;
+      grid-template-columns: 140px 1fr 180px;
+      align-items: center;
+      gap: 24px;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .event-card.inauguracao {
+      border-left: 8px solid var(--accent-inauguracao);
+    }
+
+    .event-card.retrofit {
+      border-left: 8px solid var(--accent-retrofit);
+    }
+
+    .event-card.outro {
+      border-left: 8px solid var(--accent-outro);
+    }
+
+    .event-date {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background-color: rgba(255, 255, 255, 0.05);
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .event-date .day {
+      font-size: 2.2rem;
+      font-weight: 800;
+      line-height: 1;
+      color: #ffffff;
+    }
+
+    .event-date .month {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+
+    .event-info h2 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 6px;
+    }
+
+    .event-info p {
+      font-size: 1.2rem;
+      color: var(--text-muted);
+    }
+
+    .event-badge {
+      text-align: center;
+      padding: 10px 16px;
+      border-radius: 30px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .badge-inauguracao {
+      background-color: rgba(16, 185, 129, 0.15);
+      color: var(--accent-inauguracao);
+      border: 1px solid var(--accent-inauguracao);
+    }
+
+    .badge-retrofit {
+      background-color: rgba(245, 158, 11, 0.15);
+      color: var(--accent-retrofit);
+      border: 1px solid var(--accent-retrofit);
+    }
+
+    .badge-outro {
+      background-color: rgba(59, 130, 246, 0.15);
+      color: var(--accent-outro);
+      border: 1px solid var(--accent-outro);
+    }
+
+    /* Painel de Controle Flutuante (Ocultável) */
+    .control-panel {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: rgba(15, 23, 42, 0.95);
+      border: 1px solid var(--card-border);
+      padding: 12px 24px;
+      border-radius: 50px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+      z-index: 1000;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    .control-panel.hidden {
+      opacity: 0;
+      pointer-events: none;
+      transform: translate(-50%, 50px);
+    }
+
+    .control-panel input {
+      background: #1e293b;
+      border: 1px solid var(--card-border);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 20px;
+      width: 280px;
+      font-size: 0.9rem;
+    }
+
+    .control-panel button {
+      background: #3b82f6;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: background 0.2s;
+    }
+
+    .control-panel button:hover {
+      background: #2563eb;
+    }
+
+    .btn-toggle-scroll {
+      background: #10b981 !important;
+    }
+
+    .btn-toggle-scroll.paused {
+      background: #ef4444 !important;
+    }
+
+    .btn-hide-panel {
+      background: #475569 !important;
+    }
+
+    /* Botão Flutuante para Mostrar o Painel Novamente */
+    .btn-show-controls {
+      position: fixed;
+      bottom: 15px;
+      right: 15px;
+      background: rgba(30, 41, 59, 0.8);
+      color: var(--text-muted);
+      border: 1px solid var(--card-border);
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      cursor: pointer;
+      z-index: 999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+    }
+  </style>
 </head>
-<body class="min-h-screen flex flex-col font-sans antialiased">
+<body>
 
-    <!-- CABEÇALHO FIXO -->
-    <header class="fixed top-0 left-0 right-0 z-40 bg-slate-900/95 backdrop-blur-md border-b border-slate-800 px-8 py-5 shadow-2xl flex justify-between items-center">
-        <div class="flex items-center space-x-5">
-            <div class="w-4 h-4 rounded-full bg-emerald-500 badge-pulse glow-emerald"></div>
-            <div>
-                <h1 class="text-2xl md:text-3xl font-extrabold tracking-wide font-display text-white flex items-center gap-3">
-                    <i class="fa-solid fa-store text-blue-500"></i>
-                    CALENDÁRIO DE EVENTOS & LOJAS
-                </h1>
-                <p class="text-slate-400 text-sm md:text-base font-semibold tracking-wider uppercase flex items-center gap-2">
-                    <span>Cronograma Mensal de Expansão e Reformas</span>
-                    <span class="text-slate-600">•</span>
-                    <span id="sync-status" class="text-emerald-400 font-bold"><i class="fa-solid fa-arrows-rotate mr-1"></i> AO VIVO</span>
-                </p>
-            </div>
-        </div>
-
-        <!-- RELÓGIO E DATA -->
-        <div class="text-right flex items-center space-x-6">
-            <div class="hidden sm:block text-right">
-                <div id="date-display" class="text-slate-300 font-bold text-lg md:text-xl capitalize"></div>
-                <div id="day-of-week" class="text-slate-500 text-xs font-bold tracking-widest uppercase"></div>
-            </div>
-            <div class="bg-slate-800/80 border border-slate-700/80 rounded-2xl px-5 py-2 glow-blue">
-                <div id="clock-display" class="text-3xl md:text-4xl font-black font-mono text-blue-400 tracking-wider">00:00:00</div>
-            </div>
-        </div>
-    </header>
-
-    <!-- ÁREA PRINCIPAL COM SCROLL DE EVENTOS -->
-    <main id="scroll-container" class="flex-1 mt-28 mb-16 px-6 md:px-12 lg:px-20 py-6 overflow-y-auto min-h-screen">
-        <div class="max-w-6xl mx-auto space-y-4" id="events-list">
-            <!-- Os eventos serão renderizados aqui via JavaScript -->
-        </div>
-    </main>
-
-    <!-- RODAPÉ DE CONFIGURAÇÕES E CONTROLES (Visível no mouse / Ocultável) -->
-    <div id="control-panel" class="fixed bottom-0 left-0 right-0 z-50 bg-slate-900/95 border-t border-slate-800 px-6 py-3 transition-transform duration-300 flex flex-wrap justify-between items-center text-xs md:text-sm text-slate-300">
-        
-        <!-- Toggle Painel -->
-        <div class="flex items-center space-x-4">
-            <button id="btn-toggle-panel" onclick="toggleConfigPanel()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-lg border border-slate-700 font-bold flex items-center gap-2">
-                <i class="fa-solid fa-sliders text-blue-400"></i> <span id="toggle-text">Ocultar Controles</span>
-            </button>
-            <span class="text-slate-500 hidden md:inline">|</span>
-            <div id="config-inputs" class="flex items-center space-x-3">
-                <label class="font-semibold text-slate-400">Velocidade:</label>
-                <select id="scroll-speed" onchange="changeSpeed(this.value)" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-white font-bold">
-                    <option value="slow">Lenta</option>
-                    <option value="medium" selected>Média</option>
-                    <option value="fast">Rápida</option>
-                </select>
-                <button onclick="toggleScrollPause()" id="btn-pause" class="bg-blue-600 hover:bg-blue-500 text-white font-bold px-3 py-1 rounded">
-                    <i class="fa-solid fa-pause mr-1"></i> Pausar
-                </button>
-            </div>
-        </div>
-
-        <!-- Input da Planilha Google Sheets -->
-        <div id="config-sheet" class="flex items-center space-x-2 my-1 md:my-0">
-            <i class="fa-solid fa-file-csv text-emerald-400"></i>
-            <input type="text" id="sheet-url" placeholder="Cole o link CSV público do Google Sheets aqui" 
-                   class="bg-slate-800 border border-slate-700 text-white text-xs px-3 py-1.5 rounded w-64 md:w-96 focus:outline-none focus:border-blue-500">
-            <button onclick="loadGoogleSheetData()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-1.5 rounded text-xs">
-                Carregar
-            </button>
-            <button onclick="useDemoData()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 font-bold px-3 py-1.5 rounded text-xs">
-                Dados Demo
-            </button>
-        </div>
-
-        <!-- Botão Tela Cheia -->
-        <div class="flex items-center space-x-2">
-            <button onclick="toggleFullscreen()" class="bg-slate-800 hover:bg-slate-700 text-white px-3 py-1.5 rounded border border-slate-700 font-bold">
-                <i class="fa-solid fa-expand mr-1"></i> Tela Cheia
-            </button>
-        </div>
+  <header>
+    <div class="header-title">
+      <h1>Cronograma de Eventos</h1>
+      <span class="badge-live">Ao Vivo</span>
     </div>
+    <div class="header-clock">
+      <div class="clock-time" id="clock-time">00:00:00</div>
+      <div class="clock-date" id="clock-date">Carregando data...</div>
+    </div>
+  </header>
 
-    <script>
-        // --- DADOS DE DEMONSTRAÇÃO INICIAIS ---
-        const demoEvents = [
-            { dia: "Dia 01", loja: "Loja 102 - Centro SP", evento: "Inauguração", descricao: "Abertura oficial da nova loja flagship com coquetel", status: "Em Breve" },
-            { dia: "Dia 03", loja: "Loja 045 - Shopping Iguatemi", evento: "Retrofit", descricao: "Reforma completa do piso de vendas e nova iluminação LED", status: "Confirmado" },
-            { dia: "Dia 05", loja: "Loja 088 - Barra da Tijuca RJ", evento: "Inauguração", descricao: "Nova unidade conceito com atendimento express", status: "Confirmado" },
-            { dia: "Dia 08", loja: "Loja 012 - Savassi BH", evento: "Retrofit", descricao: "Modernização de fachada e ampliação do estoque", status: "Planejado" },
-            { dia: "Dia 10", loja: "Loja 201 - Curitiba Batel", evento: "Inauguração", descricao: "Expansão para a região sul com formato mega store", status: "Confirmado" },
-            { dia: "Dia 12", loja: "Loja 033 - Campinas Cambuí", evento: "Retrofit", descricao: "Troca do sistema de climatização e layout interno", status: "Em Andamento" },
-            { dia: "Dia 15", loja: "Loja 150 - Porto Alegre Moinhos", evento: "Inauguração", descricao: "Nova loja de rua com conceito sustentável", status: "Confirmado" },
-            { dia: "Dia 18", loja: "Loja 019 - Recife Boa Viagem", evento: "Retrofit", descricao: "Adequação de acessibilidade e nova comunicação visual", status: "Planejado" },
-            { dia: "Dia 21", loja: "Loja 210 - Brasília Asa Sul", evento: "Inauguração", descricao: "Inauguração com ofertas exclusivas e presença da diretoria", status: "Confirmado" },
-            { dia: "Dia 24", loja: "Loja 064 - Salvador Barra", evento: "Retrofit", descricao: "Remodelação do setor de caixas e provadores", status: "Confirmado" },
-            { dia: "Dia 27", loja: "Loja 180 - Goiânia Bueno", evento: "Inauguração", descricao: "Nova unidade em ponto estratégico de rua", status: "Planejado" },
-            { dia: "Dia 30", loja: "Loja 005 - Matriz Pinheiros", evento: "Retrofit", descricao: "Finalização do retrofit geral de celebração de 10 anos", status: "Confirmado" }
-        ];
+  <main class="container" id="events-container">
+    <!-- Os cartões de eventos serão carregados dinamicamente via JS -->
+  </main>
 
-        let eventsData = [...demoEvents];
-        let isPaused = false;
-        let scrollSpeed = 0.8; // Velocidade padrão do scroll por frame
-        let pauseAtTopTimer = null;
-        let pauseAtBottomTimer = null;
-        let isAtBoundary = false;
+  <!-- Painel de Configurações -->
+  <div class="control-panel" id="control-panel">
+    <input type="text" id="csv-url-input" placeholder="URL do CSV do Google Sheets...">
+    <button onclick="loadSheetsCSV()">Carregar CSV</button>
+    <button id="btn-scroll" class="btn-toggle-scroll" onclick="toggleScroll()">PAUSAR ROLAGEM</button>
+    <button class="btn-hide-panel" onclick="togglePanel(false)">Ocultar Barra</button>
+  </div>
 
-        // --- RELÓGIO E DATA ---
-        function updateClock() {
-            const now = new Date();
-            
-            // Hora
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            const seconds = String(now.getSeconds()).padStart(2, '0');
-            document.getElementById('clock-display').textContent = `${hours}:${minutes}:${seconds}`;
+  <button class="btn-show-controls" onclick="togglePanel(true)" title="Mostrar Configurações">⚙️</button>
 
-            // Data
-            const optionsDate = { day: '2-digit', month: 'long', year: 'numeric' };
-            const dateString = now.toLocaleDateString('pt-BR', optionsDate);
-            document.getElementById('date-display').textContent = dateString;
+  <script>
+    // --- Dados de Exemplo Padrão (Caso nenhuma URL seja fornecida) ---
+    const defaultEvents = [
+      { date: "Dia 02", month: "Nov", title: "Loja Shopping SP", desc: "Retrofit Completo de Fachada", type: "retrofit" },
+      { date: "Dia 05", month: "Nov", title: "Loja Centro RJ", desc: "Grande Inauguração Oficial", type: "inauguracao" },
+      { date: "Dia 09", month: "Nov", title: "Loja Campinas", desc: "Ampliação da Área de Vendas", type: "retrofit" },
+      { date: "Dia 12", month: "Nov", title: "Loja Curitiba", desc: "Inauguração Nova Filial", type: "inauguracao" },
+      { date: "Dia 15", month: "Nov", title: "Loja Belo Horizonte", desc: "Manutenção Preventiva e Pintura", type: "retrofit" },
+      { date: "Dia 18", month: "Nov", title: "Loja Porto Alegre", desc: "Inauguração Conceito Flagship", type: "inauguracao" },
+      { date: "Dia 22", month: "Nov", title: "Loja Salvador", desc: "Reforma de Iluminação LED", type: "retrofit" },
+      { date: "Dia 25", month: "Nov", title: "Loja Brasília", desc: "Inauguração Ponto de Atendimento", type: "inauguracao" },
+      { date: "Dia 28", month: "Nov", title: "Loja Recife", desc: "Retrofit do Setor Administrativo", type: "retrofit" },
+      { date: "Dia 30", month: "Nov", title: "Loja Fortaleza", desc: "Inauguração Oficial de Fim de Ano", type: "inauguracao" }
+    ];
 
-            // Dia da Semana
-            const optionsDay = { weekday: 'long' };
-            const dayString = now.toLocaleDateString('pt-BR', optionsDay);
-            document.getElementById('day-of-week').textContent = dayString;
+    // --- Relógio Digital ---
+    function updateClock() {
+      const now = new Date();
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const seconds = String(now.getSeconds()).padStart(2, '0');
+      
+      document.getElementById('clock-time').textContent = `${hours}:${minutes}:${seconds}`;
+      
+      const options = { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' };
+      document.getElementById('clock-date').textContent = now.toLocaleDateString('pt-BR', options);
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // --- Renderização dos Eventos ---
+    function renderEvents(events) {
+      const container = document.getElementById('events-container');
+      container.innerHTML = '';
+
+      events.forEach(evt => {
+        const typeClass = evt.type.toLowerCase().includes('inaugur') ? 'inauguracao' : 
+                          evt.type.toLowerCase().includes('retro') ? 'retrofit' : 'outro';
+        
+        const typeLabel = typeClass === 'inauguracao' ? 'Inauguração' : 
+                          typeClass === 'retrofit' ? 'Retrofit' : 'Evento';
+
+        const card = document.createElement('div');
+        card.className = `event-card ${typeClass}`;
+        card.innerHTML = `
+          <div class="event-date">
+            <span class="day">${evt.date}</span>
+            <span class="month">${evt.month || ''}</span>
+          </div>
+          <div class="event-info">
+            <h2>${evt.title}</h2>
+            <p>${evt.desc}</p>
+          </div>
+          <div class="event-badge badge-${typeClass}">
+            ${typeLabel}
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    // --- Mecanismo de Rolagem Automática (Auto-Scroll) Preciso para TV ---
+    let scrolling = true;
+    let currentScrollPos = 0;
+    const speed = 0.8; // Velocidade da rolagem (ajuste se quiser mais rápido ou mais lento)
+    let pauseTimer = null;
+
+    function autoScrollStep() {
+      if (scrolling) {
+        const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+
+        if (maxScroll > 0) {
+          currentScrollPos += speed;
+          window.scrollTo(0, Math.floor(currentScrollPos));
+
+          // Quando chega no final da página
+          if (currentScrollPos >= maxScroll) {
+            scrolling = false;
+            // Aguarda 3 segundos no final e volta suavemente ao topo
+            pauseTimer = setTimeout(() => {
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+              setTimeout(() => {
+                currentScrollPos = 0;
+                scrolling = true;
+                requestAnimationFrame(autoScrollStep);
+              }, 1200); // Tempo para o scroll suave de volta subir completo
+            }, 3000);
+            return;
+          }
         }
-        setInterval(updateClock, 1000);
-        updateClock();
+      }
+      requestAnimationFrame(autoScrollStep);
+    }
 
-        // --- RENDERIZAR LISTA DE EVENTOS ---
-        function renderEvents() {
-            const container = document.getElementById('events-list');
-            container.innerHTML = '';
+    function toggleScroll() {
+      scrolling = !scrolling;
+      const btn = document.getElementById('btn-scroll');
+      if (scrolling) {
+        btn.textContent = 'PAUSAR ROLAGEM';
+        btn.classList.remove('paused');
+        currentScrollPos = window.scrollY;
+        requestAnimationFrame(autoScrollStep);
+      } else {
+        btn.textContent = 'INICIAR ROLAGEM';
+        btn.classList.add('paused');
+        if (pauseTimer) clearTimeout(pauseTimer);
+      }
+    }
 
-            eventsData.forEach((item, index) => {
-                const isInauguracao = item.evento.toLowerCase().includes('inaugur');
-                const badgeBg = isInauguracao ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30 glow-emerald' : 'bg-amber-500/10 text-amber-400 border-amber-500/30 glow-amber';
-                const badgeIcon = isInauguracao ? 'fa-rocket' : 'fa-wand-magic-sparkles';
-                const leftAccent = isInauguracao ? 'border-l-emerald-500' : 'border-l-amber-500';
+    function togglePanel(show) {
+      const panel = document.getElementById('control-panel');
+      if (show) {
+        panel.classList.remove('hidden');
+      } else {
+        panel.classList.add('hidden');
+      }
+    }
 
-                const cardHTML = `
-                    <div class="bg-slate-800/60 border border-slate-700/70 ${leftAccent} border-l-8 rounded-2xl p-6 shadow-xl backdrop-blur-sm transition-all hover:scale-[1.01] duration-300">
-                        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                            
-                            <!-- Coluna Esquerda: Data/Dia & Loja -->
-                            <div class="flex items-center space-x-5">
-                                <div class="bg-slate-900 border border-slate-700 px-4 py-3 rounded-xl text-center min-w-[100px]">
-                                    <span class="block text-slate-400 text-xs font-black uppercase tracking-wider">DATA</span>
-                                    <span class="text-2xl md:text-3xl font-black text-blue-400 font-display">${item.dia}</span>
-                                </div>
-                                <div>
-                                    <div class="flex items-center gap-3 mb-1">
-                                        <span class="px-3 py-1 rounded-full text-xs font-extrabold uppercase border ${badgeBg} flex items-center gap-1.5">
-                                            <i class="fa-solid ${badgeIcon}"></i>
-                                            ${item.evento}
-                                        </span>
-                                        ${item.status ? `<span class="text-xs font-semibold text-slate-400 bg-slate-900/80 px-2.5 py-0.5 rounded-md border border-slate-800">${item.status}</span>` : ''}
-                                    </div>
-                                    <h2 class="text-xl md:text-2xl font-black text-white tracking-wide">${item.loja}</h2>
-                                </div>
-                            </div>
+    // --- Integração com Google Sheets (CSV Publicado) ---
+    function loadSheetsCSV() {
+      const url = document.getElementById('csv-url-input').value.trim();
+      if (!url) {
+        alert('Por favor, insira o link CSV válido do Google Sheets.');
+        return;
+      }
 
-                            <!-- Coluna Direita: Descrição -->
-                            <div class="md:text-right max-w-md">
-                                <p class="text-slate-300 text-sm md:text-base font-medium leading-relaxed">
-                                    ${item.descricao || 'Programação de expansão e melhoria da rede de lojas.'}
-                                </p>
-                            </div>
+      localStorage.setItem('sheets_csv_url', url);
 
-                        </div>
-                    </div>
-                `;
-                container.innerHTML += cardHTML;
-            });
-        }
+      fetch(url)
+        .then(response => response.text())
+        .then(csvText => {
+          const rows = csvText.split('\n').map(row => row.split(','));
+          const fetchedEvents = [];
 
-        // --- SISTEMA DE AUTOSCROLL CONTINUO SUAVE ---
-        const container = document.getElementById('scroll-container');
-
-        function autoScrollLoop() {
-            if (!isPaused && !isAtBoundary) {
-                const maxScroll = container.scrollHeight - container.clientHeight;
-                
-                // Se ainda não chegou no fim
-                if (container.scrollTop < maxScroll - 2) {
-                    container.scrollTop += scrollSpeed;
-                } else {
-                    // Chegou ao FIM da lista (Dia 30)
-                    isAtBoundary = true;
-                    
-                    // Pausa no final antes de voltar ao topo
-                    setTimeout(() => {
-                        // Retorna suavemente ao topo
-                        container.scrollTo({ top: 0, behavior: 'smooth' });
-                        
-                        // Pausa no topo antes de recomeçar a rolar
-                        setTimeout(() => {
-                            isAtBoundary = false;
-                        }, 4000); // 4 segundos de pausa no topo
-                        
-                    }, 3000); // 3 segundos de pausa no final
-                }
+          // Pula o cabeçalho (linha 0) e lê as linhas
+          for (let i = 1; i < rows.length; i++) {
+            if (rows[i].length >= 3 && rows[i][0].trim() !== '') {
+              fetchedEvents.push({
+                date: rows[i][0].replace(/"/g, '').trim(),
+                month: rows[i][1] ? rows[i][1].replace(/"/g, '').trim() : '',
+                title: rows[i][2] ? rows[i][2].replace(/"/g, '').trim() : '',
+                desc: rows[i][3] ? rows[i][3].replace(/"/g, '').trim() : '',
+                type: rows[i][4] ? rows[i][4].replace(/"/g, '').trim() : 'outro'
+              });
             }
-            requestAnimationFrame(autoScrollLoop);
-        }
+          }
 
-        // --- CONTROLES DE VELOCIDADE E PAUSA ---
-        function changeSpeed(val) {
-            if (val === 'slow') scrollSpeed = 0.4;
-            if (val === 'medium') scrollSpeed = 0.8;
-            if (val === 'fast') scrollSpeed = 1.5;
-        }
+          if (fetchedEvents.length > 0) {
+            renderEvents(fetchedEvents);
+            currentScrollPos = 0;
+            window.scrollTo(0, 0);
+          } else {
+            alert('Nenhum dado encontrado no CSV.');
+          }
+        })
+        .catch(err => {
+          console.error(err);
+          alert('Erro ao carregar o CSV. Verifique a URL e a conexão com a internet.');
+        });
+    }
 
-        function toggleScrollPause() {
-            isPaused = !isPaused;
-            const btn = document.getElementById('btn-pause');
-            if (isPaused) {
-                btn.innerHTML = '<i class="fa-solid fa-play mr-1"></i> Continuar';
-                btn.classList.replace('bg-blue-600', 'bg-emerald-600');
-            } else {
-                btn.innerHTML = '<i class="fa-solid fa-pause mr-1"></i> Pausar';
-                btn.classList.replace('bg-emerald-600', 'bg-blue-600');
-            }
-        }
+    // --- Inicialização ---
+    window.onload = () => {
+      const savedUrl = localStorage.getItem('sheets_csv_url');
+      if (savedUrl) {
+        document.getElementById('csv-url-input').value = savedUrl;
+        loadSheetsCSV();
+      } else {
+        renderEvents(defaultEvents);
+      }
 
-        // --- INTEGRAÇÃO GOOGLE SHEETS (CSV PÚBLICO) ---
-        function loadGoogleSheetData() {
-            let url = document.getElementById('sheet-url').value.trim();
-            if (!url) {
-                alert('Por favor, insira o link CSV público do Google Sheets.\n\nNo Google Sheets vá em: Arquivo > Compartilhar > Publicar na Web > Escolha a aba e selecione ".CSV"');
-                return;
-            }
+      // Inicia a rolagem contínua
+      requestAnimationFrame(autoScrollStep);
 
-            // Atualiza o indicador para carregando
-            const syncStatus = document.getElementById('sync-status');
-            syncStatus.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1"></i> Carregando...`;
-            syncStatus.className = "text-amber-400 font-bold";
-
-            fetch(url)
-                .then(response => {
-                    if (!response.ok) throw new Error("Erro na requisição");
-                    return response.text();
-                })
-                .then(csvText => {
-                    const parsedData = parseCSV(csvText);
-                    if (parsedData.length > 0) {
-                        eventsData = parsedData;
-                        renderEvents();
-                        
-                        // Reseta o scroll para o topo
-                        container.scrollTop = 0;
-                        
-                        syncStatus.innerHTML = `<i class="fa-solid fa-check mr-1"></i> Atualizado`;
-                        syncStatus.className = "text-emerald-400 font-bold";
-                        
-                        // Salva no localStorage para não perder ao reiniciar a TV
-                        localStorage.setItem('saved_sheet_url', url);
-                    } else {
-                        alert('Nenhum dado válido encontrado no CSV.');
-                    }
-                })
-                .catch(err => {
-                    console.error(err);
-                    alert('Erro ao carregar dados do Google Sheets. Verifique se o link foi publicado como CSV público.');
-                    syncStatus.innerHTML = `<i class="fa-solid fa-triangle-exclamation mr-1"></i> Erro ao Atualizar`;
-                    syncStatus.className = "text-red-400 font-bold";
-                });
-        }
-
-        // Conversor simples de CSV para JSON
-        function parseCSV(text) {
-            const lines = text.split('\n').filter(line => line.trim() !== '');
-            if (lines.length < 2) return [];
-
-            const result = [];
-            // Pula o cabeçalho (i = 1)
-            for (let i = 1; i < lines.length; i++) {
-                // Trata aspas simples e vírgulas dentro do CSV
-                const cols = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(col => col.replace(/^"|"$/g, '').trim());
-                
-                if (cols.length >= 3) {
-                    result.push({
-                        dia: cols[0] || `Dia ${i}`,
-                        loja: cols[1] || 'Loja Não Especificada',
-                        evento: cols[2] || 'Evento',
-                        descricao: cols[3] || '',
-                        status: cols[4] || 'Confirmado'
-                    });
-                }
-            }
-            return result;
-        }
-
-        function useDemoData() {
-            eventsData = [...demoEvents];
-            renderEvents();
-            container.scrollTop = 0;
-            document.getElementById('sync-status').innerHTML = `<i class="fa-solid fa-arrows-rotate mr-1"></i> AO VIVO (Demo)`;
-        }
-
-        // --- OCULTAR/EXIBIR PAINEL DE CONTROLE ---
-        let panelVisible = true;
-        function toggleConfigPanel() {
-            panelVisible = !panelVisible;
-            const inputs = document.getElementById('config-inputs');
-            const sheet = document.getElementById('config-sheet');
-            const toggleText = document.getElementById('toggle-text');
-
-            if (!panelVisible) {
-                inputs.classList.add('hidden');
-                sheet.classList.add('hidden');
-                toggleText.textContent = 'Mostrar Controles';
-            } else {
-                inputs.classList.remove('hidden');
-                sheet.classList.remove('hidden');
-                toggleText.textContent = 'Ocultar Controles';
-            }
-        }
-
-        // --- TELA CHEIA ---
-        function toggleFullscreen() {
-            if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen().catch(err => console.log(err));
-            } else {
-                if (document.exitFullscreen) {
-                    document.exitFullscreen();
-                }
-            }
-        }
-
-        // --- INICIALIZAÇÃO DA APLICAÇÃO ---
-        window.onload = function() {
-            renderEvents();
-            
-            // Carrega URL salva da planilha se existir
-            const savedUrl = localStorage.getItem('saved_sheet_url');
-            if (savedUrl) {
-                document.getElementById('sheet-url').value = savedUrl;
-                loadGoogleSheetData();
-            }
-
-            // Inicia o loop de scroll automático
-            requestAnimationFrame(autoScrollLoop);
-
-            // Auto-refresh dos dados a cada 10 minutos (se estiver usando planilha)
-            setInterval(() => {
-                const savedUrl = localStorage.getItem('saved_sheet_url');
-                if (savedUrl) {
-                    loadGoogleSheetData();
-                }
-            }, 10 * 60 * 1000);
-        };
-    </script>
+      // Auto-atualização dos dados do CSV a cada 10 minutos (se houver URL)
+      setInterval(() => {
+        const savedUrl = localStorage.getItem('sheets_csv_url');
+        if (savedUrl) loadSheetsCSV();
+      }, 10 * 60 * 1000);
+    };
+  </script>
 </body>
 </html>
