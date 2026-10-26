@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Agenda de Eventos & Retrofits</title>
+  <title>Cronograma de Eventos & Retrofits - Sinalização Digital</title>
   <style>
     :root {
       --bg-dark: #0f172a;
@@ -23,6 +23,16 @@
       padding: 0;
     }
 
+    /* Ocultar barra de rolagem visual mantendo a capacidade de scroll */
+    ::-webkit-scrollbar {
+      display: none;
+    }
+    html {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+      scroll-behavior: auto; /* Controlado via JS para evitar conflitos com auto-scroll */
+    }
+
     body {
       background-color: var(--bg-dark);
       color: var(--text-main);
@@ -31,7 +41,7 @@
       display: flex;
       flex-direction: column;
       overflow-x: hidden;
-      padding-bottom: 100px; /* Espaço para o painel de controle */
+      padding-bottom: 120px; /* Espaço para a barra de controle */
     }
 
     /* Cabeçalho Fixo na TV */
@@ -40,19 +50,20 @@
       top: 0;
       z-index: 100;
       background-color: rgba(15, 23, 42, 0.95);
-      backdrop-filter: blur(8px);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
       padding: 20px 40px;
       border-bottom: 2px solid var(--card-border);
       display: flex;
       justify-content: space-between;
       align-items: center;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+      box-shadow: 0 4px 25px rgba(0,0,0,0.6);
     }
 
     .header-title {
       display: flex;
       align-items: center;
-      gap: 15px;
+      gap: 16px;
     }
 
     .header-title h1 {
@@ -66,18 +77,18 @@
       background-color: #ef4444;
       color: white;
       font-size: 0.85rem;
-      font-weight: bold;
-      padding: 4px 12px;
+      font-weight: 800;
+      padding: 5px 14px;
       border-radius: 20px;
       text-transform: uppercase;
       letter-spacing: 1px;
+      box-shadow: 0 0 12px rgba(239, 68, 68, 0.4);
       animation: pulse 2s infinite;
     }
 
     @keyframes pulse {
-      0% { opacity: 1; }
-      50% { opacity: 0.5; }
-      100% { opacity: 1; }
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.6; transform: scale(0.96); }
     }
 
     .header-clock {
@@ -85,28 +96,31 @@
     }
 
     .clock-time {
-      font-size: 2rem;
-      font-weight: 700;
-      font-family: monospace;
+      font-size: 2.2rem;
+      font-weight: 800;
+      font-family: 'Courier New', Courier, monospace;
       color: #ffffff;
+      letter-spacing: 1px;
     }
 
     .clock-date {
       font-size: 1rem;
+      font-weight: 600;
       color: var(--text-muted);
       text-transform: capitalize;
     }
 
-    /* Lista de Eventos */
+    /* Container Principal */
     .container {
       max-width: 1200px;
-      width: 90%;
-      margin: 30px auto;
+      width: 92%;
+      margin: 30px auto 0 auto;
       display: flex;
       flex-direction: column;
       gap: 20px;
     }
 
+    /* Cartões de Eventos */
     .event-card {
       background-color: var(--card-bg);
       border: 1px solid var(--card-border);
@@ -116,7 +130,7 @@
       grid-template-columns: 140px 1fr 180px;
       align-items: center;
       gap: 24px;
-      box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.25);
       transition: transform 0.2s ease, border-color 0.2s ease;
     }
 
@@ -137,10 +151,10 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      background-color: rgba(255, 255, 255, 0.05);
+      background-color: rgba(255, 255, 255, 0.04);
       padding: 12px;
       border-radius: 12px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.08);
     }
 
     .event-date .day {
@@ -151,31 +165,32 @@
     }
 
     .event-date .month {
-      font-size: 0.9rem;
-      font-weight: 600;
+      font-size: 0.85rem;
+      font-weight: 700;
       color: var(--text-muted);
       text-transform: uppercase;
       margin-top: 4px;
     }
 
     .event-info h2 {
-      font-size: 1.8rem;
+      font-size: 1.75rem;
       font-weight: 700;
       color: #ffffff;
       margin-bottom: 6px;
     }
 
     .event-info p {
-      font-size: 1.2rem;
+      font-size: 1.15rem;
       color: var(--text-muted);
+      line-height: 1.4;
     }
 
     .event-badge {
       text-align: center;
       padding: 10px 16px;
       border-radius: 30px;
-      font-size: 1.1rem;
-      font-weight: 700;
+      font-size: 1rem;
+      font-weight: 800;
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
@@ -184,12 +199,14 @@
       background-color: rgba(16, 185, 129, 0.15);
       color: var(--accent-inauguracao);
       border: 1px solid var(--accent-inauguracao);
+      box-shadow: 0 0 10px rgba(16, 185, 129, 0.2);
     }
 
     .badge-retrofit {
       background-color: rgba(245, 158, 11, 0.15);
       color: var(--accent-retrofit);
       border: 1px solid var(--accent-retrofit);
+      box-shadow: 0 0 10px rgba(245, 158, 11, 0.2);
     }
 
     .badge-outro {
@@ -198,7 +215,7 @@
       border: 1px solid var(--accent-outro);
     }
 
-    /* Painel de Controle Flutuante (Ocultável) */
+    /* Painel de Controle Flutuante */
     .control-panel {
       position: fixed;
       bottom: 20px;
@@ -210,10 +227,12 @@
       border-radius: 50px;
       display: flex;
       align-items: center;
-      gap: 15px;
+      gap: 12px;
       box-shadow: 0 10px 30px rgba(0,0,0,0.8);
       z-index: 1000;
       transition: opacity 0.3s ease, transform 0.3s ease;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
     }
 
     .control-panel.hidden {
@@ -228,8 +247,13 @@
       color: white;
       padding: 8px 16px;
       border-radius: 20px;
-      width: 280px;
-      font-size: 0.9rem;
+      width: 300px;
+      font-size: 0.85rem;
+      outline: none;
+    }
+
+    .control-panel input:focus {
+      border-color: #3b82f6;
     }
 
     .control-panel button {
@@ -239,9 +263,10 @@
       padding: 8px 16px;
       border-radius: 20px;
       cursor: pointer;
-      font-weight: 600;
-      font-size: 0.9rem;
-      transition: background 0.2s;
+      font-weight: 700;
+      font-size: 0.85rem;
+      transition: background 0.2s, transform 0.1s;
+      white-space: nowrap;
     }
 
     .control-panel button:hover {
@@ -260,16 +285,16 @@
       background: #475569 !important;
     }
 
-    /* Botão Flutuante para Mostrar o Painel Novamente */
+    /* Botão Flutuante para Exibir Controles */
     .btn-show-controls {
       position: fixed;
-      bottom: 15px;
-      right: 15px;
-      background: rgba(30, 41, 59, 0.8);
+      bottom: 20px;
+      right: 20px;
+      background: rgba(30, 41, 59, 0.9);
       color: var(--text-muted);
       border: 1px solid var(--card-border);
-      width: 40px;
-      height: 40px;
+      width: 44px;
+      height: 44px;
       border-radius: 50%;
       cursor: pointer;
       z-index: 999;
@@ -277,11 +302,39 @@
       align-items: center;
       justify-content: center;
       font-size: 1.2rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    }
+
+    /* Responsividade BÁSICA para telas menores */
+    @media (max-width: 768px) {
+      header {
+        padding: 15px 20px;
+      }
+      .header-title h1 {
+        font-size: 1.5rem;
+      }
+      .clock-time {
+        font-size: 1.5rem;
+      }
+      .event-card {
+        grid-template-columns: 1fr;
+        text-align: center;
+        gap: 15px;
+      }
+      .control-panel {
+        flex-direction: column;
+        border-radius: 20px;
+        width: 90%;
+      }
+      .control-panel input {
+        width: 100%;
+      }
     }
   </style>
 </head>
 <body>
 
+  <!-- CABEÇALHO -->
   <header>
     <div class="header-title">
       <h1>Cronograma de Eventos</h1>
@@ -293,36 +346,40 @@
     </div>
   </header>
 
+  <!-- CONTAINER DE EVENTOS (DO DIA 01 AO DIA 30) -->
   <main class="container" id="events-container">
-    <!-- Os cartões de eventos serão carregados dinamicamente via JS -->
+    <!-- Os eventos serão renderizados via JavaScript -->
   </main>
 
-  <!-- Painel de Configurações -->
+  <!-- PAINEL DE CONTROLE FLUTUANTE -->
   <div class="control-panel" id="control-panel">
-    <input type="text" id="csv-url-input" placeholder="URL do CSV do Google Sheets...">
+    <input type="text" id="csv-url-input" placeholder="Cole o link CSV do Google Sheets aqui...">
     <button onclick="loadSheetsCSV()">Carregar CSV</button>
     <button id="btn-scroll" class="btn-toggle-scroll" onclick="toggleScroll()">PAUSAR ROLAGEM</button>
     <button class="btn-hide-panel" onclick="togglePanel(false)">Ocultar Barra</button>
   </div>
 
+  <!-- BOTÃO REABRIR CONFIGURAÇÕES -->
   <button class="btn-show-controls" onclick="togglePanel(true)" title="Mostrar Configurações">⚙️</button>
 
   <script>
-    // --- Dados de Exemplo Padrão (Caso nenhuma URL seja fornecida) ---
+    // --- DADOS DE DEMONSTRAÇÃO (Dia 01 ao Dia 30) ---
     const defaultEvents = [
-      { date: "Dia 02", month: "Nov", title: "Loja Shopping SP", desc: "Retrofit Completo de Fachada", type: "retrofit" },
-      { date: "Dia 05", month: "Nov", title: "Loja Centro RJ", desc: "Grande Inauguração Oficial", type: "inauguracao" },
-      { date: "Dia 09", month: "Nov", title: "Loja Campinas", desc: "Ampliação da Área de Vendas", type: "retrofit" },
-      { date: "Dia 12", month: "Nov", title: "Loja Curitiba", desc: "Inauguração Nova Filial", type: "inauguracao" },
-      { date: "Dia 15", month: "Nov", title: "Loja Belo Horizonte", desc: "Manutenção Preventiva e Pintura", type: "retrofit" },
-      { date: "Dia 18", month: "Nov", title: "Loja Porto Alegre", desc: "Inauguração Conceito Flagship", type: "inauguracao" },
-      { date: "Dia 22", month: "Nov", title: "Loja Salvador", desc: "Reforma de Iluminação LED", type: "retrofit" },
-      { date: "Dia 25", month: "Nov", title: "Loja Brasília", desc: "Inauguração Ponto de Atendimento", type: "inauguracao" },
-      { date: "Dia 28", month: "Nov", title: "Loja Recife", desc: "Retrofit do Setor Administrativo", type: "retrofit" },
-      { date: "Dia 30", month: "Nov", title: "Loja Fortaleza", desc: "Inauguração Oficial de Fim de Ano", type: "inauguracao" }
+      { date: "Dia 01", month: "Nov", title: "Loja 101 - Centro SP", desc: "Coquetel de Reinauguração e Novo Layout Varejo", type: "inauguracao" },
+      { date: "Dia 03", month: "Nov", title: "Loja 042 - Shopping Iguatemi", desc: "Retrofit da Fachada e Troca de Iluminação por LED", type: "retrofit" },
+      { date: "Dia 05", month: "Nov", title: "Loja 088 - Barra da Tijuca RJ", desc: "Abertura de Nova Loja Conceito Flagship", type: "inauguracao" },
+      { date: "Dia 08", month: "Nov", title: "Loja 012 - Savassi BH", desc: "Modernização do Sistema de Climatização e Pisos", type: "retrofit" },
+      { date: "Dia 10", month: "Nov", title: "Loja 201 - Curitiba Batel", desc: "Inauguração Oficial do Espaço de Atendimento VIP", type: "inauguracao" },
+      { date: "Dia 13", month: "Nov", title: "Loja 033 - Campinas Cambuí", desc: "Retrofit do Setor de Caixas e Pintura Externa", type: "retrofit" },
+      { date: "Dia 15", month: "Nov", title: "Loja 150 - Porto Alegre Moinhos", desc: "Grande Inauguração do Ponto Sustentável de RUA", type: "inauguracao" },
+      { date: "Dia 18", month: "Nov", title: "Loja 019 - Recife Boa Viagem", desc: "Reforma Estrutural e Adequação de Acessibilidade", type: "retrofit" },
+      { date: "Dia 21", month: "Nov", title: "Loja 210 - Brasília Asa Sul", desc: "Cerimônia de Inauguração com Diretoria e Clientes", type: "inauguracao" },
+      { date: "Dia 24", month: "Nov", title: "Loja 064 - Salvador Barra", desc: "Retrofit Completo de Provadores e Expansão de Estoque", type: "retrofit" },
+      { date: "Dia 27", month: "Nov", title: "Loja 180 - Goiânia Bueno", desc: "Inauguração Nova Filial de Grande Porte", type: "inauguracao" },
+      { date: "Dia 30", month: "Nov", title: "Loja 005 - Matriz Pinheiros", desc: "Finalização do Retrofit Geral do Prédio Central", type: "retrofit" }
     ];
 
-    // --- Relógio Digital ---
+    // --- RELÓGIO DIGITAL EM TEMPO REAL ---
     function updateClock() {
       const now = new Date();
       const hours = String(now.getHours()).padStart(2, '0');
@@ -337,14 +394,15 @@
     setInterval(updateClock, 1000);
     updateClock();
 
-    // --- Renderização dos Eventos ---
+    // --- RENDERIZAR EVENTOS NA TELA ---
     function renderEvents(events) {
       const container = document.getElementById('events-container');
       container.innerHTML = '';
 
       events.forEach(evt => {
-        const typeClass = evt.type.toLowerCase().includes('inaugur') ? 'inauguracao' : 
-                          evt.type.toLowerCase().includes('retro') ? 'retrofit' : 'outro';
+        const typeStr = (evt.type || '').toLowerCase();
+        const typeClass = typeStr.includes('inaugur') ? 'inauguracao' : 
+                          typeStr.includes('retro') ? 'retrofit' : 'outro';
         
         const typeLabel = typeClass === 'inauguracao' ? 'Inauguração' : 
                           typeClass === 'retrofit' ? 'Retrofit' : 'Evento';
@@ -368,39 +426,50 @@
       });
     }
 
-    // --- Mecanismo de Rolagem Automática (Auto-Scroll) Preciso para TV ---
+    // --- AUTO-SCROLL CONTINUO E FLUIDO (Otimizado para TV Box) ---
     let scrolling = true;
     let currentScrollPos = 0;
-    const speed = 0.8; // Velocidade da rolagem (ajuste se quiser mais rápido ou mais lento)
-    let pauseTimer = null;
+    const speed = 0.8; // Velocidade do scroll suave por frame
+    let isWaitingAtBoundary = false;
 
     function autoScrollStep() {
-      if (scrolling) {
+      if (scrolling && !isWaitingAtBoundary) {
         const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
 
         if (maxScroll > 0) {
+          // Acumula em float e aplica em valor inteiro para evitar limitações de sub-pixels
           currentScrollPos += speed;
           window.scrollTo(0, Math.floor(currentScrollPos));
 
-          // Quando chega no final da página
+          // Chegou ao fim da página
           if (currentScrollPos >= maxScroll) {
-            scrolling = false;
-            // Aguarda 3 segundos no final e volta suavemente ao topo
-            pauseTimer = setTimeout(() => {
+            isWaitingAtBoundary = true;
+            
+            // Pausa de 3 segundos no final do mês/dia 30
+            setTimeout(() => {
+              // Retorna suavemente ao topo
               window.scrollTo({ top: 0, behavior: 'smooth' });
+              
+              // Aguarda o scroll de volta finalizar antes de reiniciar a rolagem para baixo
               setTimeout(() => {
                 currentScrollPos = 0;
-                scrolling = true;
+                window.scrollTo(0, 0);
+                isWaitingAtBoundary = false;
                 requestAnimationFrame(autoScrollStep);
-              }, 1200); // Tempo para o scroll suave de volta subir completo
+              }, 1500);
+
             }, 3000);
             return;
           }
         }
       }
-      requestAnimationFrame(autoScrollStep);
+      
+      if (!isWaitingAtBoundary) {
+        requestAnimationFrame(autoScrollStep);
+      }
     }
 
+    // --- CONTROLES DE INTERAÇÃO ---
     function toggleScroll() {
       scrolling = !scrolling;
       const btn = document.getElementById('btn-scroll');
@@ -408,11 +477,11 @@
         btn.textContent = 'PAUSAR ROLAGEM';
         btn.classList.remove('paused');
         currentScrollPos = window.scrollY;
+        isWaitingAtBoundary = false;
         requestAnimationFrame(autoScrollStep);
       } else {
         btn.textContent = 'INICIAR ROLAGEM';
         btn.classList.add('paused');
-        if (pauseTimer) clearTimeout(pauseTimer);
       }
     }
 
@@ -425,50 +494,60 @@
       }
     }
 
-    // --- Integração com Google Sheets (CSV Publicado) ---
+    // --- CARREGAMENTO DO GOOGLE SHEETS (CSV PUBLICADO) ---
     function loadSheetsCSV() {
       const url = document.getElementById('csv-url-input').value.trim();
       if (!url) {
-        alert('Por favor, insira o link CSV válido do Google Sheets.');
+        alert('Por favor, insira a URL CSV do Google Sheets.');
         return;
       }
 
       localStorage.setItem('sheets_csv_url', url);
 
       fetch(url)
-        .then(response => response.text())
+        .then(response => {
+          if (!response.ok) throw new Error("Rede/URL Inválida");
+          return response.text();
+        })
         .then(csvText => {
-          const rows = csvText.split('\n').map(row => row.split(','));
-          const fetchedEvents = [];
-
-          // Pula o cabeçalho (linha 0) e lê as linhas
-          for (let i = 1; i < rows.length; i++) {
-            if (rows[i].length >= 3 && rows[i][0].trim() !== '') {
-              fetchedEvents.push({
-                date: rows[i][0].replace(/"/g, '').trim(),
-                month: rows[i][1] ? rows[i][1].replace(/"/g, '').trim() : '',
-                title: rows[i][2] ? rows[i][2].replace(/"/g, '').trim() : '',
-                desc: rows[i][3] ? rows[i][3].replace(/"/g, '').trim() : '',
-                type: rows[i][4] ? rows[i][4].replace(/"/g, '').trim() : 'outro'
-              });
-            }
-          }
-
-          if (fetchedEvents.length > 0) {
-            renderEvents(fetchedEvents);
+          const parsedEvents = parseCSV(csvText);
+          if (parsedEvents.length > 0) {
+            renderEvents(parsedEvents);
             currentScrollPos = 0;
             window.scrollTo(0, 0);
           } else {
-            alert('Nenhum dado encontrado no CSV.');
+            alert('Nenhum evento encontrado na planilha.');
           }
         })
         .catch(err => {
           console.error(err);
-          alert('Erro ao carregar o CSV. Verifique a URL e a conexão com a internet.');
+          alert('Erro ao carregar os dados. Verifique se publicou no formato CSV público.');
         });
     }
 
-    // --- Inicialização ---
+    // Parser manual para CSV lidando com aspas e vírgulas
+    function parseCSV(text) {
+      const lines = text.split('\n').filter(line => line.trim() !== '');
+      if (lines.length < 2) return [];
+
+      const result = [];
+      // Começa do índice 1 para ignorar o cabeçalho
+      for (let i = 1; i < lines.length; i++) {
+        const cols = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/^"|"$/g, '').trim());
+        if (cols.length >= 3 && cols[0] !== '') {
+          result.push({
+            date: cols[0],
+            month: cols[1] || '',
+            title: cols[2] || '',
+            desc: cols[3] || '',
+            type: cols[4] || 'outro'
+          });
+        }
+      }
+      return result;
+    }
+
+    // --- INICIALIZAÇÃO DA APLICAÇÃO ---
     window.onload = () => {
       const savedUrl = localStorage.getItem('sheets_csv_url');
       if (savedUrl) {
@@ -478,10 +557,10 @@
         renderEvents(defaultEvents);
       }
 
-      // Inicia a rolagem contínua
+      // Inicia o loop de auto-scroll
       requestAnimationFrame(autoScrollStep);
 
-      // Auto-atualização dos dados do CSV a cada 10 minutos (se houver URL)
+      // Auto-atualização periódica da planilha a cada 10 minutos
       setInterval(() => {
         const savedUrl = localStorage.getItem('sheets_csv_url');
         if (savedUrl) loadSheetsCSV();
